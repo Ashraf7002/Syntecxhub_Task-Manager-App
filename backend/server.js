@@ -1,35 +1,43 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+
 const connectDB = require("./config/db");
 
 const app = express();
 
-// Connect DB
+// ✅ Connect Database
 connectDB();
 
-// Middleware
+// ✅ Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: "*"
+}));
 
-// Routes
+// ✅ Routes
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/tasks", require("./routes/taskRoutes"));
 
 // ✅ Import auth middleware
 const authMiddleware = require("./middleware/authMiddleware");
 
-// ✅ Protected test route (ADD HERE)
+// ✅ Protected Route
 app.get("/api/protected", authMiddleware, (req, res) => {
-  res.json({ msg: "You accessed protected route 🎉", user: req.user });
+  res.json({
+    msg: "You accessed protected route 🎉",
+    user: req.user
+  });
 });
 
-// Test route
+// ✅ Test Route
 app.get("/", (req, res) => {
   res.send("API Running Successfully 🚀");
 });
 
-const PORT = 5000;
+// ✅ PORT FIX (IMPORTANT FOR RENDER)
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

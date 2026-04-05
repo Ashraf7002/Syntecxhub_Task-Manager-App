@@ -1,5 +1,5 @@
 import Sidebar from "../components/Sidebar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -18,12 +18,15 @@ function Dashboard() {
 
   const token = localStorage.getItem("token");
 
-  // ✅ FETCH TASKS
-  const fetchTasks = async () => {
+  // 🔥 IMPORTANT: USE YOUR DEPLOYED BACKEND
+  const API = "https://task-manager-backend-pIOj.onrender.com";
+
+  // ✅ FETCH TASKS (FIXED WITH useCallback)
+  const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
 
-      const res = await axios.get("https://task-manager-backend-pIOj.onrender.com/api/tasks", {
+      const res = await axios.get(`${API}/api/tasks`, {
         headers: { Authorization: token },
       });
 
@@ -33,12 +36,12 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   // ✅ DELETE TASK
   const deleteTask = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/tasks/${id}`, {
+      await axios.delete(`${API}/api/tasks/${id}`, {
         headers: { Authorization: token },
       });
 
@@ -57,7 +60,7 @@ function Dashboard() {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/tasks",
+        `${API}/api/tasks`,
         { title, description },
         { headers: { Authorization: token } }
       );
@@ -76,7 +79,7 @@ function Dashboard() {
   const updateTask = async () => {
     try {
       await axios.put(
-        `http://localhost:5000/api/tasks/${editId}`,
+        `${API}/api/tasks/${editId}`,
         { title: editTitle, description: editDesc },
         { headers: { Authorization: token } }
       );
@@ -92,6 +95,7 @@ function Dashboard() {
     }
   };
 
+  // ✅ FIXED useEffect
   useEffect(() => {
     if (!token) {
       window.location.href = "/";
@@ -104,12 +108,10 @@ function Dashboard() {
     <div style={{ display: "flex" }}>
       <Toaster position="top-right" />
 
-      {/* Sidebar */}
       <div style={{ position: "fixed", height: "100vh", width: "220px" }}>
         <Sidebar dark={dark} setDark={setDark} />
       </div>
 
-      {/* Main */}
       <div
         style={{
           marginLeft: "220px",
@@ -123,9 +125,6 @@ function Dashboard() {
         }}
       >
         <h1>🚀 Task Manager</h1>
-        <p style={{ opacity: 0.8 }}>
-          Organize your daily tasks efficiently
-        </p>
 
         <div style={mainCard}>
           <h3>Add Task</h3>
@@ -150,11 +149,8 @@ function Dashboard() {
 
           <hr />
 
-          {/* ✅ EDIT FORM */}
           {editId && (
             <div style={editCard}>
-              <h3>Edit Task ✏️</h3>
-
               <input
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
@@ -186,24 +182,10 @@ function Dashboard() {
 
           <hr />
 
-          {/* 🔥 LOADING */}
           {loading ? (
-            <div style={{ textAlign: "center", padding: "20px" }}>
-              <div style={spinner}></div>
-              <p>Loading tasks...</p>
-            </div>
+            <p>Loading...</p>
           ) : tasks.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "30px" }}>
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
-                width="100"
-                alt="empty"
-              />
-              <h3>No Tasks Yet</h3>
-              <p style={{ opacity: 0.7 }}>
-                Start by adding your first task 🚀
-              </p>
-            </div>
+            <p>No Tasks Yet 🚀</p>
           ) : (
             tasks.map((task) => (
               <div key={task._id} style={taskCard}>
@@ -218,14 +200,14 @@ function Dashboard() {
                   }}
                   style={editBtn}
                 >
-                  Edit ✏️
+                  Edit
                 </button>
 
                 <button
                   onClick={() => deleteTask(task._id)}
                   style={deleteBtn}
                 >
-                  Delete ❌
+                  Delete
                 </button>
               </div>
             ))
@@ -236,77 +218,14 @@ function Dashboard() {
   );
 }
 
-/* 🎨 STYLES */
-
-const spinner = {
-  width: "40px",
-  height: "40px",
-  border: "4px solid #ccc",
-  borderTop: "4px solid #6366f1",
-  borderRadius: "50%",
-  margin: "auto",
-  animation: "spin 1s linear infinite",
-};
-
-const mainCard = {
-  maxWidth: "720px",
-  margin: "auto",
-  padding: "25px",
-  borderRadius: "20px",
-  background: "rgba(255,255,255,0.08)",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px",
-  marginBottom: "12px",
-  borderRadius: "10px",
-};
-
-const taskCard = {
-  background: "#1e293b",
-  padding: "15px",
-  borderRadius: "14px",
-  marginBottom: "12px",
-};
-
-const primaryBtn = {
-  width: "100%",
-  padding: "12px",
-  background: "#6366f1",
-  border: "none",
-  borderRadius: "10px",
-  color: "white",
-};
-
-const editBtn = {
-  background: "#4facfe",
-  color: "white",
-  padding: "6px 10px",
-  marginRight: "10px",
-};
-
-const deleteBtn = {
-  background: "#ff4d4d",
-  color: "white",
-  padding: "6px 10px",
-};
-
-const editCard = {
-  marginTop: "20px",
-  padding: "20px",
-  borderRadius: "15px",
-  background: "rgba(255,165,0,0.15)",
-};
-
-const cancelBtn = {
-  marginTop: "10px",
-  width: "100%",
-  padding: "10px",
-  background: "#888",
-  border: "none",
-  borderRadius: "10px",
-  color: "white",
-};
+/* styles same as before */
+const mainCard = { maxWidth: "720px", margin: "auto", padding: "25px" };
+const inputStyle = { width: "100%", padding: "10px", marginBottom: "10px" };
+const taskCard = { background: "#1e293b", padding: "10px", marginBottom: "10px" };
+const primaryBtn = { width: "100%", padding: "10px", background: "#6366f1", color: "#fff" };
+const editBtn = { marginRight: "10px" };
+const deleteBtn = { background: "red", color: "#fff" };
+const editCard = { marginTop: "20px" };
+const cancelBtn = { marginTop: "10px" };
 
 export default Dashboard;

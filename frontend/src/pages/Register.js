@@ -15,7 +15,7 @@ function Register() {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/users/register", {
+      await axios.post("https://task-manager-backend-pIOj.onrender.com/api/users/register", {
         name,
         email,
         password,

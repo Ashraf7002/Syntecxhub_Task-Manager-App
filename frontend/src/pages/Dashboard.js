@@ -98,7 +98,7 @@ function Dashboard() {
     } else {
       fetchTasks();
     }
-  }, []);
+  }, [fetchTasks, token]);
 
   return (
     <div style={{ display: "flex" }}>

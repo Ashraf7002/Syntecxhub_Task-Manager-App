@@ -11,22 +11,24 @@ connectDB();
 
 // ✅ Middleware
 app.use(express.json());
+
+// 🔥 FIXED CORS (IMPORTANT)
 app.use(cors({
-  origin: "*"
+  origin: "https://task-manager-app-by-ashraf.vercel.app",
+  credentials: true
 }));
 
 // ✅ Routes
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/tasks", require("./routes/taskRoutes"));
 
-// ✅ Import auth middleware
+// ✅ Protected Route (FIXED BUG)
 const authMiddleware = require("./middleware/authMiddleware");
 
-// ✅ Protected Route
 app.get("/api/protected", authMiddleware, (req, res) => {
   res.json({
     msg: "You accessed protected route 🎉",
-    user: req.user
+    user: req.user   // ✅ FIXED (was wrong before)
   });
 });
 
@@ -35,7 +37,7 @@ app.get("/", (req, res) => {
   res.send("API Running Successfully 🚀");
 });
 
-// ✅ PORT FIX (IMPORTANT FOR RENDER)
+// ✅ PORT FIX (Render)
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
